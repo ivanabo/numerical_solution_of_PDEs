@@ -1,0 +1,257 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,total={150mm,240mm}]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amscd}
+\usepackage{grffile}
+\usepackage{tikz}
+\usepackage{eurosym}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\lstset{language=C++, basicstyle=\ttfamily,
+  keywordstyle=\color{black}\bfseries, tabsize=4, stringstyle=\ttfamily,
+  commentstyle=\itshape, extendedchars=true, escapeinside={/*@}{@*/}}
+\usepackage{paralist}
+\usepackage{curves}
+\usepackage{calc}
+\usepackage{picinpar}
+\usepackage{enumerate}
+\usepackage{algpseudocode}
+\usepackage{bm}
+\usepackage{multibib}
+\usepackage{hyperref}
+\usepackage{textcase}
+\usepackage{nicefrac}
+
+\definecolor{listingbg}{gray}{0.95}
+
+\title{Numeričko rješavanje PDJ 2 \\
+Zadatak MF2}
+\author{Ivana Bobinac}
+\date{ }
+
+\begin{document}
+
+\maketitle
+%\tableofcontents
+%\clearpage
+
+\section{Zadatak}
+Riješiti zadaću potpuno mješivog toka:
+\begin{equation} \label{eq:1}
+\frac{\partial c}{\partial t} - div( D(\textbf{u}) \nabla c ) + \textbf{u} \cdot \nabla c = 0 \; u \; \Omega \times (0,T),
+\end{equation}
+\begin{equation} \label{eq:2}
+div(\textbf{u}) = 0,
+\end{equation}
+\begin{equation} \label{eq:3}
+\textbf{u} = -\textit{k}(x) \nabla p.
+\end{equation}
+
+\begin{align*}
+\Omega &= (0,10) \times (0,1), \\
+D(\textbf{u}) &= 1 + \frac{|\textbf{u}|^2}{1 + |\textbf{u}|}, \\
+|\textbf{u}| &= \sqrt{u_1^2 + u_2^2}, \\
+k(x) &> 0.
+\end{align*}
+
+Rubni uvjeti:
+\begin{align*}
+\textbf{u} \cdot \textbf{n} &= 0, \; D(\textbf{u}) \nabla c \cdot \textbf{n} = 0 \; za \; y = 0,1, \; t \in [0,T], \\
+p &= 1, c = y(1-y) \; za \; x = 0, \\
+p &= 0, D(\textbf{u}) \nabla c \cdot \textbf{n} = 0 \; za \; x \; = 10.
+\end{align*}
+
+Početni uvjet:
+\begin{equation*}
+c = 0.
+\end{equation*}
+
+\section{Varijacijska formulacija}
+Neka je $V = \{ v \in H^1(\Omega) : v = g \; na \; \Gamma_D \}$ te $U = \{ u \in H^1(\Omega) : u = 0 \; na \; \Gamma_D \}$. Množenjem jednadžbe (\ref{eq:1}) sa $\varphi \in U$, te integriranjem po $\Omega$ imamo:
+\begin{equation*}
+\int_{\Omega} \frac{\partial c}{\partial t} \varphi d\textbf{x} - \int_{\Omega} div(D(\textbf{u}) \nabla c) \varphi d\textbf{x} + \int_{\Omega} \textbf{u} \cdot \nabla c \varphi d\textbf{x} = 0.
+\end{equation*}
+
+Vrijedi:
+\begin{align*}
+- \int_{\Omega} div(D(\textbf{u}) \nabla c) \varphi d\textbf{x} &= -\int_{\Omega} \Big( div(D(\textbf{u}) \nabla c \varphi) - D(\textbf{u}) \nabla c \cdot \nabla \varphi \Big) d\textbf{x} \\ 
+&= -\int_{\partial \Omega} D(\textbf{u}) \nabla c \cdot \textbf{n} \varphi dS + \int_{\Omega} \Big( D(\textbf{u}) \nabla c \cdot \nabla \varphi \Big) d\textbf{x},
+\end{align*}
+
+pa imamo:
+\begin{align*}
+\frac{d}{dt} \int_{\Omega} c \varphi d\textbf{x} + \int_{\Omega} \Big( D(\textbf{u}) \nabla c \cdot \nabla \varphi \big) d\textbf{x} &+ \int_{\Omega} \Big( \textbf{u} \cdot \nabla c \varphi \Big) d\textbf{x} = \\
+&= \int_{\Gamma_N} D(\textbf{u}) \nabla c \cdot \textbf{n} \varphi dS + \int_{\Gamma_D} D(\textbf{u}) \nabla c \cdot \textbf{n} \varphi dS, \; \forall \varphi \in U.
+\end{align*}
+
+Zatim, množenjem $div(-k(x) \nabla p) = 0$ sa $v \in U$, te integriranjem po $\Omega$, imamo:
+\begin{align*}
+0 = \int_{\Omega} div(-k(x) \nabla p) v d\textbf{x} &= \int_{\Omega} \Big( div(-k(x) \nabla p v) - (-k(x) \nabla p) \cdot \nabla v \Big) d\textbf{x} \\
+&= \int_{\partial \Omega} -k(x) \nabla p \cdot \textbf{n} v dS - \int_{\Omega} (-k(x) \nabla p) \cdot \nabla v d\textbf{x},
+\end{align*}
+
+odnosno
+\begin{equation*}
+\int_{\Omega} (-k(x) \nabla p) \cdot \nabla v d\textbf{x} = \int_{\Gamma_N} -k(x) \nabla p \cdot \textbf{n} v dS + \int_{\Gamma_D} -k(x) \nabla p \cdot \textbf{n} v dS, \forall v \in U.
+\end{equation*}
+
+Dakle, imamo dvije slabe formulacije:
+
+\[
+	 (SF1) \left\{
+		\begin{array}{ll}
+			\text{Naći} \; p \in G + U \; \text{t.d.} \\ 
+\int_{\Omega} (-k(x) \nabla p) \cdot \nabla v d\textbf{x} = 0, \; \forall v \in V.
+		\end{array}
+		\right.
+\]
+
+\[
+	(SF2) \left\{
+		\begin{array}{ll}
+			\text{Naći} \; c \in G + U \; t.d. \\
+			\frac{d}{dt} \int_{\Omega} c\varphi d\textbf{x} + \int_{\Omega} \Big( D(\textbf{u}) \nabla c \cdot \nabla \varphi \big) d\textbf{x} + \int_{\Omega} \Big( \textbf{u} \cdot \nabla c \varphi \Big) d\textbf{x} = 0, \; \forall \varphi \in U.
+		\end{array}
+		\right.
+\]
+
+\section{Diskretizacija zadaće}
+
+Diskretizacija od $(SF1)$ se vrši na način da osnovni prostor $V$ zamijenimo konačnodimenzionalnim prostorom konačnih elemenata $V_h \subset V$ te rješavamo jednadžbu $\mathcal{R}(P) = 0$, gdje je $\mathcal{R}(P) = \Big( \mathcal{R}(P)_i \Big)_{i=1}^N$,
+
+\begin{equation*}
+\mathcal{R}(P) = \int_{\Omega} \Big( -k(x) \nabla p \cdot \nabla \phi_i \Big) dx + \int_{\Gamma_N} j \phi_i dS,
+\end{equation*}
+
+pri čemu je $V_h = \mathcal{L}(\phi_1, ..., \phi_N)$ te je $P = (p_i)_{i=1}^{N_1}$ vektor koeficijenata rješenja $p$,
+
+\begin{equation*}
+p(x) = \sum_{i=1}^{N_1} p_i \phi_i(x), \; N_1 \geq N.
+\end{equation*}
+
+Na svakom pojedinom elementu mreže $K$ računamo dva doprinosa rezidualu $\mathcal{R}(P)$:
+
+\begin{equation*}
+\alpha_{\text{vol}}^{K}(p, \phi_i) = \int_K ( \nabla p \cdot \nabla \phi_i )dx
+\end{equation*}
+i
+\begin{equation*}
+\alpha_{\text{bdr}}^{K \cap \Gamma_N}(p, \phi_i) = \int_{K \cap \Gamma_N} ( j \phi_i )dS.
+\end{equation*}
+
+Zatim, kako je $u = -k(x) \nabla p$, gradijent dobivenog rješenja $p$ koristimo pri rješavanju druge jednadžbe. Diskretizacija od $(SF2)$ se sastoji od prostorne disketizacije, koja je analogna diskretizaciji od $(SF1)$, i vremenske diskretizacije. Dakle, ponovno osnovni prostor $H$ zamjenjujemo konačnodimenzionalnim prostorom konačnih elemenata $H_h \subset H$ te dobivamo semidiskretiziranu zadaću
+\begin{align*}
+&\text{Naći} \; c_h \in H_h \; \text{t.d.} \\
+&\frac{d}{dt} \int_{\Omega} c_h v dx + \int_{\Omega} \Big( D(u) \nabla c_h \cdot \nabla v + u \cdot \nabla c_h v \Big) dx = 0, \; \forall v \in H_h, t \in (0,T), \\
+&c_h(0) = c_{0h},
+\end{align*}
+gdje je $c_{0h} \in H_h$ aproksimacija početnog uvjeta. Do pune diskretizacije dolazimo diskretizacijom vremenske derivacije; koristimo implicitnu Eulerovu metodu. Dakle, računamo rezidual oblika
+\begin{equation*}
+\frac{1}{\Delta t_n} \Big( \int_{\Omega} c_h^{n+1} v dx - \int_{\Omega} c_h^{n} v dx \Big) + \int_{\Omega} \Big( D(u) \nabla c_h^{n+1} \cdot \nabla v + u \cdot \nabla c_h^{n+1} v \Big) dx = 0
+\end{equation*}
+
+\section{Organizacija koda}
+\textbf{Glavni program}, dan u datoteci \textit{MF2.cc}, sadrži main funkciju koja provjerava ispravnost pokretanja programa (program se pokreće sa $./MF2 <dt> <tend> <variance>$, gdje $dt$ označava vremenski korak, $tend$ granicu vremenskog intervala, a $variance$ varijancu potrebnu za dobivanje koeficijenta $k$) te zatim učitava ulazne parametre iz datoteke \textit{MF2.input}, redom: razina profinjenja \textit{level}, dimenzije pravokutne domene \textit{xLength} i \textit{yLength}, broj elemenata u svakom smjeru \textit{nox} i \textit{noy}, \textit{mean} i \textit{correlation\_length} - vrijednosti varijabli potrebnih za implementaciju log-normalne slučajne veličine $k$ koja je dana pomoću klase \textit{EberhardPermeabilityGenerator}. Zatim se kreira grid te se instancira objekt klase \textit{koef\_sl} koji daje vrijednost koeficijenta $k$ u pojedinoj točki domene. Klasa \textit{koef\_sl} je dana u datoteci \textit{slvel.hh}. Potom se poziva driver rutina koja je dana u datoteci \textit{combo\_driver.hh}. \textbf{Driver rutina} vrši sve potrebno za disretizaciju jednadžbe i rješavanje diskretnog sustava te daje vizualizaciju u VTK formatu. \textbf{Rubni uvjeti} su implementirani sa po dvije klase za svaku jednadžbu. Za $p$ su to klase \textit{DirichletBdry} i \textit{BCExtensionP}, a za $c$ su to \textit{BCTypeParam} i \textit{BCExtensionC}; sve dane u datoteci \textit{bctype\_MF2.hh}. U oba slučaja prva navedena daje Dirichletov rub, a druga navedena daje vrijednost Dirichletovog uvjeta u danoj točki. \textbf{Lokalni operatori} su dani u datotekama \textit{operator\_MF2.hh} (lokalni operator jednadžbe za $p$), \textit{space\_operator.hh} (lokalni prostorni operator jednadžbe za $c$) i \textit{time\_operator.hh} (lokalni vremenski operator jednadžbe za $c$).
+
+\section{Provedeni testovi i ilustracija simulacija}
+
+U input datoteci su odabrani parametri
+\begin{align*}
+&level = 0, \\
+&xLength = 10.0, \\
+&yLength = 1.0, \\
+&nox = 4, \\
+&noy = 40, \\
+&mean = 0.0, \\
+&correlation\_length = 0.02.
+\end{align*}
+Parametri komandne linije:
+\begin{align*}
+&dt = 2.5,\\
+&tend = 10.0, \\
+&variance = 2.0.
+\end{align*}
+
+Na slici \ref{fig:p} je prikazano dobiveno rješenje za $p$ sa navedenim parametrima. Na slikama \ref{fig:c0}, \ref{fig:c25}, \ref{fig:c6}, \ref{fig:c10} je prikazano dobiveno rješenje za $c$ sa navedenim parametrima u različitim vremenskim trenucima.
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.35]{pressure_2_5_10_2.png}
+\caption{Grafički prikaz rješenja $p$}
+\label{fig:p}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_2_5_10_2_0.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 0s$}
+\label{fig:c0}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_2_5_10_2_2_5.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 2.5s$}
+\label{fig:c25}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_2_5_10_2_6.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 6s$}
+\label{fig:c6}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_2_5_10_2_10.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 10s$}
+\label{fig:c10}
+\end{center}
+\end{figure}
+
+Vizualnom usporedbom rješenja dobivenih za različite vrijednosti varijance možemo zaključiti da se disperzija koncentracije $c$ povećava povećavanjem varijance od $k$. Na slikama \ref{fig:02}, \ref{fig:08}, \ref{fig:14}, \ref{fig:20} se može promotriti rješenje sa ranije navedenim parametrima (uz izmjenu $tend = 1.5$) prikazano u trenutku $t = 1.5s$, pri čemu je varijanca redom $0.2$, $0.8$, $1.4$, $2.0$.
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_0_2_1_5cut.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 1.5s$ uz vrijednost varijance $0.2$}
+\label{fig:02}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_0_8_1_5cut.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 1.5s$ uz vrijednost varijance $0.8$}
+\label{fig:08}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_1_4_1_5cut.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 1.5s$ uz vrijednost varijance $1.4$}
+\label{fig:14}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!t]
+\begin{center}
+\includegraphics[scale=0.4]{conc_2_0_1_5cut.png}
+\caption{Grafički prikaz rješenja $c$ u trenutku $t = 1.5s$ uz vrijednost varijance $2.0$}
+\label{fig:20}
+\end{center}
+\end{figure}
+
+\end{document}

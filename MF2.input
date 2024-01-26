@@ -1,0 +1,7 @@
+level = 0
+xLength = 10.0
+yLength = 1.0
+nox = 4
+noy = 40
+mean = 0.0
+correlation_length = 0.02
